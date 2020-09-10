@@ -126,6 +126,7 @@ export default {
   methods: {
     toggleTermVisibility(index) {
       this.$store.dispatch(this.imageModule + 'toggleTermVisibility', index);
+      if(this.terms[index].visible) this.$eventBus.$emit('reloadAnnotations');
     },
     changeOpacity(index, event) {
       let opacity = Number(event.target.value);

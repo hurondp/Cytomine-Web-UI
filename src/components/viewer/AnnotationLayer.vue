@@ -209,6 +209,8 @@ export default {
         }
       });
 
+      let displayedTerms = this.terms.filter(term => term.visible).map(term => term.id);
+
       let annots = await new AnnotationCollection({
         user: !this.layer.isReview ? this.layer.id : null,
         image: this.image.id,
@@ -216,6 +218,9 @@ export default {
         notReviewedOnly: !this.layer.isReview && this.reviewMode,
         bbox: extent.join(),
         showWKT: true,
+        terms: displayedTerms,
+        noTerm: this.imageWrapper.style.displayNoTerm,
+
         showTerm: true,
         showGIS: true,
         kmeans: true
