@@ -257,6 +257,8 @@ import {ImageInstanceCollection, UserCollection, UserJobCollection, AnnotationCo
 import {fullName} from '@/utils/user-utils.js';
 import {defaultColors} from '@/utils/style-utils.js';
 
+import {extractParamsList, extractParamItem} from '@/utils/query-param-utils.js';
+
 // store options to use with store helpers to target projects/currentProject/listImages module
 const storeOptions = {rootModuleProp: 'storeModule'};
 // redefine helpers to use storeOptions and correct module path
@@ -486,28 +488,44 @@ export default {
     },
     resetPagesAndFilters() {
       this.$store.commit(this.storeModule + '/resetPagesAndFilters');
-    }
-  },
-  watch: {
-    querySearchTags(values) {
+    },
+    retrieveSelectedTags(values) {
       if(values) {
         this.selectedTags = [];
-        let queriedTags = this.availableTags.filter(tag => values.split(',').includes(tag.name));
+        let queriedTags = extractParamsList(values, 'name', this.availableTags);
         if(queriedTags) {
           this.resetPagesAndFilters(); // we want all annotations of the job => reset state
           this.selectedTags = queriedTags;
         }
       }
     },
-    querySearchImage(val) {
+    retrieveSelectedImage(val) {
       if(val) {
         this.selectedImages = [];
-        let queriedImage = this.images.find(image => image.id === Number(val));
+        let queriedImage = extractParamItem(Number(val), 'id', this.images);
         if(queriedImage) {
           this.resetPagesAndFilters(); // we want all annotations of the image => reset state
           this.selectedImages = [queriedImage];
         }
       }
+    },
+    retrieveSelectedUserJob(val) {
+      if(val) {
+        let queriedUserJob = extractParamItem(Number(val), 'id', this.images);
+        if(queriedUserJob) {
+          this.resetPagesAndFilters(); // we want all annotations of the job => reset state
+          this.selectedAnnotationType = this.jobAnnotationOption;
+          this.selectedUserJobs = [queriedUserJob];
+        }
+      }
+    }
+  },
+  watch: {
+    querySearchTags(values) {
+      this.retrieveSelectedTags(values);
+    },
+    querySearchImage(val) {
+      this.retrieveSelectedImage(val);
     }
   },
   async created() {
@@ -544,29 +562,11 @@ export default {
       this.selectedAnnotationType = this.targetAnnotationType;
     }
 
-    if(this.$route.query.image) {
-      let queriedImage = this.images.find(image => image.id === Number(this.$route.query.image));
-      if(queriedImage) {
-        this.resetPagesAndFilters(); // we want all annotations of the image => reset state
-        this.selectedImages = [queriedImage];
-      }
-    }
+    this.retrieveSelectedImage(this.$route.query.image);
 
-    if(this.$route.query.userJob) {
-      let queriedUserJob = this.userJobs.find(uj => uj.id === Number(this.$route.query.userJob));
-      if(queriedUserJob) {
-        this.resetPagesAndFilters(); // we want all annotations of the job => reset state
-        this.selectedAnnotationType = this.jobAnnotationOption;
-        this.selectedUserJobs = [queriedUserJob];
-      }
-    }
-    if(this.$route.query.tags) {
-      let queriedTags = this.availableTags.filter(tag => this.$route.query.tags.split(',').includes(tag.name));
-      if(queriedTags) {
-        this.resetPagesAndFilters(); // we want all annotations of the tags => reset state
-        this.selectedTags = queriedTags;
-      }
-    }
+    this.retrieveSelectedUserJob(this.$route.query.userJob);
+
+    this.retrieveSelectedTags(this.$route.query.tags);
 
     this.loading = false;
   }

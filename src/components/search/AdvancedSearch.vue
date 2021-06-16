@@ -255,6 +255,7 @@ import CytomineMultiselect from '@/components/form/CytomineMultiselect';
 import {ImageInstanceCollection, ProjectCollection, TagCollection} from 'cytomine-client';
 import {getWildcardRegexp} from '@/utils/string-utils';
 import IconProjectMemberRole from '@/components/icons/IconProjectMemberRole';
+import {extractParamsList} from '@/utils/query-param-utils.js';
 
 export default {
   name: 'advanced-search',
@@ -298,7 +299,16 @@ export default {
   methods: {
     debounceSearchString: _.debounce(async function(value) {
       this.searchString = value;
-    }, 500)
+    }, 500),
+    retrieveSelectedTags(values) {
+      if(values) {
+        this.selectedTags = [];
+        let queriedTags = extractParamsList(values, 'name', this.availableTags);
+        if(queriedTags) {
+          this.selectedTags = queriedTags;
+        }
+      }
+    }
   },
   computed: {
     currentUser: get('currentUser/user'),
@@ -352,9 +362,6 @@ export default {
       }
       return collection;
     },
-
-
-
   },
   watch: {
     pathSearchString(val) {
@@ -368,13 +375,7 @@ export default {
       }
     },
     querySearchTags(values) {
-      if(values) {
-        this.selectedTags = [];
-        let queriedTags = this.availableTags.filter(tag => values.split(',').includes(tag.name));
-        if(queriedTags) {
-          this.selectedTags = queriedTags;
-        }
-      }
+      this.retrieveSelectedTags(values);
     },
   },
   async created() {
@@ -386,12 +387,7 @@ export default {
       console.log(error);
       this.error = true;
     }
-    if(this.$route.query.tags) {
-      let queriedTags = this.availableTags.filter(tag => this.$route.query.tags.split(',').includes(tag.name));
-      if(queriedTags) {
-        this.selectedTags = queriedTags;
-      }
-    }
+    this.retrieveSelectedTags(this.$route.query.tags);
 
     this.loading = false;
   }

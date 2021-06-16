@@ -235,6 +235,8 @@ import AddProjectModal from './AddProjectModal';
 
 import {get, sync, syncBoundsFilter, syncMultiselectFilter} from '@/utils/store-helpers';
 
+import {extractParamsList} from '@/utils/query-param-utils.js';
+
 import {ProjectCollection, OntologyCollection, TagCollection} from 'cytomine-client';
 import IconProjectMemberRole from '@/components/icons/IconProjectMemberRole';
 export default {
@@ -364,7 +366,7 @@ export default {
     perPage: sync('listProjects/perPage'),
     sortField: sync('listProjects/sortField'),
     sortOrder: sync('listProjects/sortOrder'),
-    openedDetails: sync('listProjects/openedDetails')
+    openedDetails: sync('listProjects/openedDetails'),
   },
   watch: {
     revision() {
@@ -372,13 +374,7 @@ export default {
       this.fetchMaxFilters();
     },
     querySearchTags(values) {
-      if(values) {
-        this.selectedTags = [];
-        let queriedTags = this.availableTags.filter(tag => values.split(',').includes(tag.name));
-        if(queriedTags) {
-          this.selectedTags = queriedTags;
-        }
-      }
+      this.retrieveSelectedTags(values);
     }
   },
   methods: {
@@ -421,6 +417,15 @@ export default {
         });
         return;
       }
+    },
+    retrieveSelectedTags(values) {
+      if(values) {
+        this.selectedTags = [];
+        let queriedTags = extractParamsList(values, 'name', this.availableTags);
+        if(queriedTags) {
+          this.selectedTags = queriedTags;
+        }
+      }
     }
   },
   async created() {
@@ -435,12 +440,8 @@ export default {
       console.log(error);
       this.error = true;
     }
-    if(this.$route.query.tags) {
-      let queriedTags = this.availableTags.filter(tag => this.$route.query.tags.split(',').includes(tag.name));
-      if(queriedTags) {
-        this.selectedTags = queriedTags;
-      }
-    }
+
+    this.retrieveSelectedTags(this.$route.query.tags);
 
     this.loading = false;
   }

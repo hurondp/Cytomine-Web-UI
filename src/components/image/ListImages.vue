@@ -250,6 +250,8 @@ import ImageDetails from './ImageDetails';
 import AddImageModal from './AddImageModal';
 import vendorFromMime from '@/utils/vendor';
 
+import {extractParamsList} from '@/utils/query-param-utils.js';
+
 import {ImageInstanceCollection, TagCollection} from 'cytomine-client';
 
 // store options to use with store helpers to target projects/currentProject/listImages module
@@ -437,18 +439,21 @@ export default {
 
     toggleFilterDisplay() {
       this.filtersOpened = !this.filtersOpened;
-    }
-  },
-  watch: {
-    querySearchTags(values) {
+    },
+    retrieveSelectedTags(values) {
       if(values) {
         this.selectedTags = [];
-        let queriedTags = this.availableTags.filter(tag => values.split(',').includes(tag.name));
+        let queriedTags = extractParamsList(values, 'name', this.availableTags);
         if(queriedTags) {
           this.selectedTags = queriedTags;
         }
       }
     }
+  },
+  watch: {
+    querySearchTags(values) {
+      this.retrieveSelectedTags(values);
+    },
   },
   async created() {
     try {
@@ -462,12 +467,7 @@ export default {
       console.log(error);
       this.error = true;
     }
-    if(this.$route.query.tags) {
-      let queriedTags = this.availableTags.filter(tag => this.$route.query.tags.split(',').includes(tag.name));
-      if(queriedTags) {
-        this.selectedTags = queriedTags;
-      }
-    }
+    this.retrieveSelectedTags(this.$route.query.tags);
   }
 };
 </script>
