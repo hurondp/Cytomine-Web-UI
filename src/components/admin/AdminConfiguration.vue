@@ -17,6 +17,27 @@
 <div>
   <h2>{{$t('welcome-message')}}</h2>
   <cytomine-quill-editor v-model="welcomeConfig.value" />
+
+
+  <div class="panel">
+    <p class="panel-heading">
+      {{ $t('configuration') }}
+    </p>
+    <div class="panel-block storage">
+      <b-field
+        :key="activityRetention"
+        :label="$t('activities-time-to-live-in-hours')"
+        horizontal
+      >
+        <b-input
+          v-model="activitiesRetentionDelayConfig.value"
+          :name="field"
+          placeholder=""
+        />
+      </b-field>
+    </div>
+  </div>
+
   <p class="has-text-right">
     <button class="button is-link" @click="save">{{$t('button-save')}}</button>
   </p>
@@ -33,7 +54,8 @@ export default {
   components: {CytomineQuillEditor},
   data() {
     return {
-      welcomeConfig: new Configuration({key: constants.CONFIG_KEY_WELCOME, value: '', readingRole: 'all'})
+      welcomeConfig: new Configuration({key: constants.CONFIG_KEY_WELCOME, value: '', readingRole: 'all'}),
+      activitiesRetentionDelayConfig: new Configuration({key: constants.CONFIG_KEY_ACTIVITIES_RETENTION_DELAY_IN_HOURS, value: '0', readingRole: 'all'})
     };
   },
   methods: {
@@ -45,17 +67,25 @@ export default {
         else {
           await this.welcomeConfig.save();
         }
-        this.$notify({type: 'success', text: this.$t('notif-success-welcome-message-update')});
+
+        if(!this.activitiesRetentionDelayConfig.value) {
+          await this.activitiesRetentionDelayConfig.delete();
+        }
+        else {
+          await this.activitiesRetentionDelayConfig.save();
+        }
+        this.$notify({type: 'success', text: this.$t('notif-success-configuration-update')});
       }
       catch(error) {
         console.log(error);
-        this.$notify({type: 'error', text: this.$t('notif-error-welcome-message-update')});
+        this.$notify({type: 'error', text: this.$t('notif-error-configuration-update')});
       }
     }
   },
   async created() {
     try {
       await this.welcomeConfig.fetch();
+      await this.activitiesRetentionDelayConfig.fetch();
     }
     catch(error) {
       // no welcome message currently set
