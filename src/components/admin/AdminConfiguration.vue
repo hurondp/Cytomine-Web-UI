@@ -17,6 +17,34 @@
 <div>
   <h2>{{$t('welcome-message')}}</h2>
   <cytomine-quill-editor v-model="welcomeConfig.value" />
+
+
+  <div class="panel">
+    <p class="panel-heading">
+      {{ $t('configuration') }}
+    </p>
+    <div class="panel-block storage">
+      <b-field
+        :label="$t('top-menu-color')"
+        horizontal
+      >
+        <b-input
+          v-model="topMenuColorConfig.value"
+          placeholder=""
+        />
+      </b-field>
+      <b-field
+        :label="$t('logo')"
+        horizontal
+      >
+        <b-input
+          v-model="logoConfig.value"
+          placeholder=""
+        />
+      </b-field>
+    </div>
+  </div>
+
   <p class="has-text-right">
     <button class="button is-link" @click="save">{{$t('button-save')}}</button>
   </p>
@@ -33,7 +61,9 @@ export default {
   components: {CytomineQuillEditor},
   data() {
     return {
-      welcomeConfig: new Configuration({key: constants.CONFIG_KEY_WELCOME, value: '', readingRole: 'all'})
+      welcomeConfig: new Configuration({key: constants.CONFIG_KEY_WELCOME, value: '', readingRole: 'all'}),
+      topMenuColorConfig: new Configuration({key: constants.CONFIG_KEY_COLOR_TOP_MENU, value: '', readingRole: 'all'}),
+      logoConfig: new Configuration({key: constants.CONFIG_KEY_LOGO_TOP_MENU, value: '', readingRole: 'all'})
     };
   },
   methods: {
@@ -44,6 +74,18 @@ export default {
         }
         else {
           await this.welcomeConfig.save();
+        }
+        if(!this.topMenuColorConfig.value && this.topMenuColorConfig.id!=null) {
+          await this.topMenuColorConfig.delete();
+        }
+        else if (this.topMenuColorConfig.value) {
+          await this.topMenuColorConfig.save();
+        }
+        if(!this.logoConfig.value && this.logoConfig.id!=null) {
+          await this.logoConfig.delete();
+        }
+        else if (this.logoConfig.value) {
+          await this.logoConfig.save();
         }
         this.$notify({type: 'success', text: this.$t('notif-success-welcome-message-update')});
       }
@@ -59,6 +101,18 @@ export default {
     }
     catch(error) {
       // no welcome message currently set
+    }
+    try {
+      await this.topMenuColorConfig.fetch();
+    }
+    catch(error) {
+      // ignored
+    }
+    try {
+      await this.logoConfig.fetch();
+    }
+    catch(error) {
+      // ignored
     }
   }
 };

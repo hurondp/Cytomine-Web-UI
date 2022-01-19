@@ -13,10 +13,10 @@
  limitations under the License.-->
 
 <template>
-<nav class="navbar is-light" role="navigation">
+<nav class="navbar is-light" role="navigation" v-bind:style="{ backgroundColor: activeColor}">
   <div class="navbar-brand">
-    <router-link to="/" exact class="navbar-item">
-      <img src="@/assets/logo.svg" id="logo" alt="Cytomine">
+    <router-link to="/" exact class="navbar-item" v-bind:style="{ backgroundColor: activeColor}">
+      <img :src="logo" id="logo" alt="Cytomine">
     </router-link>
     <a role="" class="navbar-burger" :class="{'is-active':openedTopMenu}" @click="openedTopMenu=!openedTopMenu">
       <span></span> <span></span> <span></span>
@@ -107,9 +107,9 @@ import HotkeysModal from './HotkeysModal';
 import AboutCytomineModal from './AboutCytomineModal';
 import CytomineSearcher from '@/components/search/CytomineSearcher';
 
-import {Cytomine} from 'cytomine-client';
+import {Cytomine, Configuration} from 'cytomine-client';
 import {fullName} from '@/utils/user-utils.js';
-
+import constants from '@/utils/constants';
 export default {
   name: 'cytomine-navbar',
   components: {
@@ -122,7 +122,10 @@ export default {
     return {
       openedTopMenu: false,
       hotkeysModal: false,
-      aboutModal: false
+      aboutModal: false,
+      activeColor: '#f5f5f5',
+      logo: require('@/assets/logo.svg') //'https://www.belgium.be/themes/custom/belgium_theme/images/logos/logo-be.svg'
+      //constants.LOGO_TOP_MENU //require('@/assets/logo.svg')
     };
   },
   computed: {
@@ -200,6 +203,26 @@ export default {
         console.log(error);
         this.$notify({type: 'error', text: this.$t('notif-error-logout')});
       }
+    }
+  },
+  async created() {
+    try {
+      let value = (await Configuration.fetch(constants.CONFIG_KEY_COLOR_TOP_MENU)).value;
+      if (value && value!=='') {
+        this.activeColor = value;
+      }
+    }
+    catch(error) {
+      // no config defined
+    }
+    try {
+      let value = (await Configuration.fetch(constants.CONFIG_KEY_LOGO_TOP_MENU)).value;
+      if (value && value!=='') {
+        this.logo = value;
+      }
+    }
+    catch(error) {
+      // no config defined
     }
   }
 };
