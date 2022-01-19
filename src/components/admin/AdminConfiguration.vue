@@ -68,10 +68,10 @@ export default {
           await this.welcomeConfig.save();
         }
 
-        if(!this.activitiesRetentionDelayConfig.value) {
+        if(!this.activitiesRetentionDelayConfig.value && this.activitiesRetentionDelayConfig.id!=null) {
           await this.activitiesRetentionDelayConfig.delete();
         }
-        else {
+        else if (this.activitiesRetentionDelayConfig.value) {
           await this.activitiesRetentionDelayConfig.save();
         }
         this.$notify({type: 'success', text: this.$t('notif-success-configuration-update')});
