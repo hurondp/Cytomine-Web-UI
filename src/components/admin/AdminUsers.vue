@@ -135,6 +135,15 @@
         </template>
       </cytomine-table>
 
+      <div class="box">
+        <h2 class="has-text-centered"> {{ $t('download-results') }} </h2>
+        <div class="buttons is-centered">
+          <a class="button is-link" :href="downloadURL('pdf')">{{$t('download-PDF')}}</a>
+          <a class="button is-link" :href="downloadURL('csv')">{{$t('download-CSV')}}</a>
+          <a class="button is-link" :href="downloadURL('xls')">{{$t('download-excel')}}</a>
+        </div>
+      </div>
+
       <user-modal :active.sync="modal" :user="editedUser" @addUser="refreshUsers" @updateUser="updateUser" />
     </template>
   </template>
@@ -215,6 +224,9 @@ export default {
     },
     getRoleData(user) {
       return this.roles[user.role];
+    },
+    downloadURL(format) {
+      return Cytomine.instance.host + Cytomine.instance.basePath + 'user/action/download.' + format;
     },
     async lock(user) {
       try {
