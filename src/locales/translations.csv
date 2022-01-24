@@ -1021,3 +1021,6 @@ notif-error-source-delete,Failed to delete trusted source {username}/{dockerUser
 logo, Logo, Logo
 top-menu-color, Top menu color, Couleur du menu supérieur
 report, Report, Signaler
+activities-time-to-live-in-hours, Activities retention delay (hours), Délai de rétention des activités (heures)
+notif-success-configuration-update,Configurations successfully updated,La configuration a bien été mis à jour
+notif-error-configuration-update,Failed to update configurations,Une erreur a empêché de mettre à jour des configurations

@@ -42,6 +42,17 @@
           placeholder=""
         />
       </b-field>
+
+      <b-field
+        :label="$t('activities-time-to-live-in-hours')"
+        horizontal
+      >
+        <b-input
+          v-model="activitiesRetentionDelayConfig.value"
+          placeholder=""
+        />
+      </b-field>
+
     </div>
   </div>
 
@@ -64,6 +75,7 @@ export default {
       welcomeConfig: new Configuration({key: constants.CONFIG_KEY_WELCOME, value: '', readingRole: 'all'}),
       topMenuColorConfig: new Configuration({key: constants.CONFIG_KEY_COLOR_TOP_MENU, value: '', readingRole: 'all'}),
       logoConfig: new Configuration({key: constants.CONFIG_KEY_LOGO_TOP_MENU, value: '', readingRole: 'all'})
+      activitiesRetentionDelayConfig: new Configuration({key: constants.CONFIG_KEY_ACTIVITIES_RETENTION_DELAY_IN_HOURS, value: '0', readingRole: 'all'})
     };
   },
   methods: {
@@ -87,11 +99,19 @@ export default {
         else if (this.logoConfig.value) {
           await this.logoConfig.save();
         }
-        this.$notify({type: 'success', text: this.$t('notif-success-welcome-message-update')});
+
+        if(!this.activitiesRetentionDelayConfig.value && this.activitiesRetentionDelayConfig.id!=null) {
+          await this.activitiesRetentionDelayConfig.delete();
+        }
+        else if (this.activitiesRetentionDelayConfig.value) {
+          await this.activitiesRetentionDelayConfig.save();
+        }
+
+        this.$notify({type: 'success', text: this.$t('notif-success-configuration-update')});
       }
       catch(error) {
         console.log(error);
-        this.$notify({type: 'error', text: this.$t('notif-error-welcome-message-update')});
+        this.$notify({type: 'error', text: this.$t('notif-error-configuration-update')});
       }
     }
   },
@@ -110,6 +130,12 @@ export default {
     }
     try {
       await this.logoConfig.fetch();
+    }
+    catch(error) {
+      // ignored
+    }
+    try {
+      await this.activitiesRetentionDelayConfig.fetch();
     }
     catch(error) {
       // ignored
